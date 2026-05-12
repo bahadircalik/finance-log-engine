@@ -1,0 +1,8 @@
+# Bağımlılıklar
+transaction-service/node_modules/
+
+# Gizli Kasa (Şifreler)
+transaction-service/.env
+
+# Sistem Dosyaları
+.DS_Store
