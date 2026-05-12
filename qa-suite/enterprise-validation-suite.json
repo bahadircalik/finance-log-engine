@@ -1,0 +1,139 @@
+{
+	"info": {
+		"name": "Enterprise Finance Log Engine - QA Verification Suite",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. API Operator Authentication (Login)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"if(jsonData.token) {",
+							"    pm.collectionVariables.set(\"current_jwt_token\", jsonData.token);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"ProductionPassword2026!\"\n}",
+					"options": { "raw": { "language": "json" } }
+				},
+				"url": { "raw": "http://localhost:3000/login" }
+			}
+		},
+		{
+			"name": "2. Node API: Valid Clean Transaction",
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Authorization", "value": "{{current_jwt_token}}" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"txn_id\": \"TXN-NODE-CLEAN-01\",\n  \"op\": \"SALE\",\n  \"amt\": 450.00,\n  \"curr\": \"TRY\",\n  \"bank\": \"Akbank\",\n  \"store\": \"Starbucks\",\n  \"mcc\": 5812,\n  \"city\": \"Istanbul\",\n  \"lat\": 41.0082,\n  \"lon\": 28.9784,\n  \"auth\": \"CONTACTLESS\",\n  \"status\": \"SUCCESS\",\n  \"user\": \"operator_alpha\"\n}",
+					"options": { "raw": { "language": "json" } }
+				},
+				"url": { "raw": "http://localhost:3000/" }
+			}
+		},
+		{
+			"name": "3. Node API: High Value Fraud Anomaly Detection",
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Authorization", "value": "{{current_jwt_token}}" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"txn_id\": \"TXN-NODE-HIGH-VALUE-01\",\n  \"op\": \"SALE\",\n  \"amt\": 27500.00,\n  \"curr\": \"TRY\",\n  \"bank\": \"Garanti\",\n  \"store\": \"Apple Store\",\n  \"mcc\": 5732,\n  \"city\": \"Ankara\",\n  \"lat\": 39.9334,\n  \"lon\": 32.8597,\n  \"auth\": \"3D_SECURE\",\n  \"status\": \"SUCCESS\",\n  \"user\": \"operator_beta\"\n}",
+					"options": { "raw": { "language": "json" } }
+				},
+				"url": { "raw": "http://localhost:3000/" }
+			}
+		},
+		{
+			"name": "4. Node API Quarantine: Missing Mandatory Field",
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Authorization", "value": "{{current_jwt_token}}" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"txn_id\": \"TXN-NODE-ERR-MIS-01\",\n  \"op\": \"SALE\",\n  \"amt\": 120.00,\n  \"curr\": \"TRY\",\n  \"bank\": \"Isbank\",\n  \"store\": \"Migros\",\n  \"mcc\": 5411,\n  \"city\": \"Izmir\",\n  \"lat\": 38.4237,\n  \"lon\": 27.1428,\n  \"auth\": \"PIN\",\n  \"status\": \"SUCCESS\"\n}",
+					"options": { "raw": { "language": "json" } }
+				},
+				"url": { "raw": "http://localhost:3000/" }
+			}
+		},
+		{
+			"name": "5. Node API Quarantine: Data Type Mismatch (Amt String)",
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Authorization", "value": "{{current_jwt_token}}" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"txn_id\": \"TXN-NODE-ERR-TYP-01\",\n  \"op\": \"SALE\",\n  \"amt\": \"TWO_HUNDRED_TRY\",\n  \"curr\": \"TRY\",\n  \"bank\": \"YapiKredi\",\n  \"store\": \"Zara\",\n  \"mcc\": 5651,\n  \"city\": \"Bursa\",\n  \"lat\": 40.1885,\n  \"lon\": 29.0610,\n  \"auth\": \"PIN\",\n  \"status\": \"SUCCESS\",\n  \"user\": \"operator_gamma\"\n}",
+					"options": { "raw": { "language": "json" } }
+				},
+				"url": { "raw": "http://localhost:3000/" }
+			}
+		},
+		{
+			"name": "6. Node API Quarantine: Geo Bounds Violation (Lat > 90)",
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Authorization", "value": "{{current_jwt_token}}" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"txn_id\": \"TXN-NODE-ERR-GEO-01\",\n  \"op\": \"SALE\",\n  \"amt\": 85.00,\n  \"curr\": \"TRY\",\n  \"bank\": \"QNB\",\n  \"store\": \"Trendyol\",\n  \"mcc\": 5311,\n  \"city\": \"Exosphere\",\n  \"lat\": 120.5000,\n  \"lon\": 28.9784,\n  \"auth\": \"FACE_ID\",\n  \"status\": \"SUCCESS\",\n  \"user\": \"operator_delta\"\n}",
+					"options": { "raw": { "language": "json" } }
+				},
+				"url": { "raw": "http://localhost:3000/" }
+			}
+		},
+		{
+			"name": "7. Logstash Pipeline: Valid Clean Log Entry",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"txn_id\": \"TXN-LOGSTASH-CLEAN-01\",\n  \"op\": \"SALE\",\n  \"amt\": 900.00,\n  \"curr\": \"USD\",\n  \"bank\": \"Vakifbank\",\n  \"store\": \"Amazon\",\n  \"mcc\": 5311,\n  \"city\": \"Adana\",\n  \"lat\": 37.0000,\n  \"lon\": 35.3213,\n  \"auth\": \"PIN\",\n  \"status\": \"SUCCESS\",\n  \"user\": \"legacy_system_operator\"\n}",
+					"options": { "raw": { "language": "json" } }
+				},
+				"url": { "raw": "http://localhost:8080/" }
+			}
+		},
+		{
+			"name": "8. Logstash Pipeline Quarantine: Invalid ISO Currency Format",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"txn_id\": \"TXN-LOGSTASH-ERR-CURR\",\n  \"op\": \"SALE\",\n  \"amt\": 320.00,\n  \"curr\": \"US_DOLLAR\",\n  \"bank\": \"Ziraat\",\n  \"store\": \"Bim\",\n  \"mcc\": 5411,\n  \"city\": \"Trabzon\",\n  \"lat\": 41.0027,\n  \"lon\": 39.7168,\n  \"auth\": \"CONTACTLESS\",\n  \"status\": \"SUCCESS\",\n  \"user\": \"legacy_system_operator\"\n}",
+					"options": { "raw": { "language": "json" } }
+				},
+				"url": { "raw": "http://localhost:8080/" }
+			}
+		},
+		{
+			"name": "9. Logstash Pipeline Quarantine: Complex Object Type Mismatch",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"txn_id\": \"TXN-LOGSTASH-ERR-OBJ\",\n  \"op\": \"SALE\",\n  \"amt\": \"NOT_A_NUMBER_MALFORMED\",\n  \"curr\": \"EUR\",\n  \"bank\": \"Halkbank\",\n  \"store\": \"eBay\",\n  \"mcc\": 5311,\n  \"city\": \"Antalya\",\n  \"lat\": 36.8969,\n  \"lon\": 30.7133,\n  \"auth\": \"PIN\",\n  \"status\": \"SUCCESS\",\n  \"user\": \"legacy_system_operator\"\n}",
+					"options": { "raw": { "language": "json" } }
+				},
+				"url": { "raw": "http://localhost:8080/" }
+			}
+		}
+	],
+	"variable": [{ "key": "current_jwt_token", "value": "" }]
+}
