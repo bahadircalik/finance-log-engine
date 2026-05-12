@@ -1,8 +1,13 @@
-# Bağımlılıklar
-transaction-service/node_modules/
+# Bağımlılıklar (Asla GitHub'a yüklenmez)
+node_modules/
+npm-debug.log*
 
-# Gizli Kasa (Şifreler)
-transaction-service/.env
-
-# Sistem Dosyaları
+# Mac İşletim Sistemi Çöpleri
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Docker ve Geçici Dosyalar
+.elastic/
